@@ -32,8 +32,6 @@ return {
             if ok and blink.get_lsp_capabilities then
                 caps = blink.get_lsp_capabilities(caps)
             end
-            -- NOTE: do NOT disable snippetSupport — LSP needs it for parens/args
-
             local on_attach = function(client, bufnr)
                 client.server_capabilities.semanticTokensProvider = nil
                 vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
@@ -46,14 +44,29 @@ return {
                 map("n", "<leader>rn", vim.lsp.buf.rename)
                 map("n", "<leader>ca", vim.lsp.buf.code_action)
                 map("n", "<leader>f", function()
-                    vim.lsp.buf.format({ async = false })
+                    if supports(bufnr, "textDocument/formatting") then
+                        vim.lsp.buf.format({ async = false })
+                    else
+                    end
                 end)
             end
 
             local lspconfig = require("lspconfig")
-            for _, name in ipairs({ "rust_analyzer", "pyright", "bashls", "marksman", "clangd" }) do
+            for _, name in ipairs({ "rust_analyzer", "pyright", "bashls", "marksman" }) do
                 lspconfig[name].setup({ capabilities = caps, on_attach = on_attach })
             end
+
+            lspconfig.clangd.setup({
+                capabilities = caps,
+                on_attach = on_attach,
+                cmd = {
+                    "clangd",
+                    "--background-index",
+                    "--clang-tidy",
+                    "--header-insertion=iwyu",
+                    "--query-driver=/nix/store/*/bin/*,/run/current-system/sw/bin/*,/usr/bin/*",
+                },
+            })
 
             lspconfig.lua_ls.setup({
                 capabilities = caps,

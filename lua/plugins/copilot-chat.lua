@@ -16,7 +16,10 @@ return {
       -- Floating Copilot Chat
   { "<leader>cc", function() require("CopilotChat").toggle({ window = { layout = "float", name = "CopilotChatFloat" } }) end, desc = "Copilot Chat (float)" },
   -- Vsplit Copilot Chat
-  { "<leader>cC", function() require("CopilotChat").toggle({ window = { layout = "vsplit", name = "CopilotChatVsplit" } }) end, desc = "Copilot Chat (vsplit)" },
+      { "<leader>cC", function()
+        vim.cmd('vsplit')
+        require("CopilotChat").toggle({ window = { layout = "vsplit", name = "CopilotChatVsplit" } })
+      end, desc = "Copilot Chat (vsplit)" },
     },
     config = function()
       require("CopilotChat").setup({

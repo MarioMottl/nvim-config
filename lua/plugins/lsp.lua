@@ -135,17 +135,23 @@ return {
                 lspconfig[name].setup({ capabilities = caps, on_attach = on_attach })
             end
 
-            lspconfig.clangd.setup({
-                capabilities = caps,
-                on_attach = on_attach,
-                cmd = {
-                    "clangd",
-                    "--background-index",
-                    "--clang-tidy",
-                    "--header-insertion=iwyu",
-                    "--query-driver=/nix/store/*/bin/*,/run/current-system/sw/bin/*,/usr/bin/*",
-                },
-            })
+            local clangd_path = vim.fn.exepath("clangd")
+            if clangd_path == "" then
+                vim.notify("clangd not found in PATH (start nvim inside your nix dev shell)", vim.log.levels.ERROR)
+            else
+                lspconfig.clangd.setup({
+                    cmd = {
+                        clangd_path,
+                        "--background-index",
+                        "--clang-tidy",
+                        "--header-insertion=iwyu",
+                        "--compile-commands-dir=build",
+                        "--query-driver=/nix/store/*/bin/*,/run/current-system/sw/bin/*,/usr/bin/*",
+                    },
+                    capabilities = caps,
+                    on_attach = on_attach,
+                })
+            end
 
             lspconfig.lua_ls.setup({
                 capabilities = caps,

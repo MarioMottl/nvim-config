@@ -1,3 +1,19 @@
+-- Set relative line numbers in visual mode, absolute in insert mode
+vim.api.nvim_create_autocmd({"InsertEnter"}, {
+    callback = function()
+        vim.opt.relativenumber = false
+        vim.opt.number = true
+    end,
+})
+
+vim.api.nvim_create_autocmd({"InsertLeave", "ModeChanged"}, {
+    callback = function()
+        if vim.fn.mode():match("v") then
+            vim.opt.relativenumber = true
+            vim.opt.number = true
+        end
+    end,
+})
 local fmt_group = vim.api.nvim_create_augroup("LspFormatOnSave", { clear = true })
 
 vim.api.nvim_create_autocmd("BufWritePre", {

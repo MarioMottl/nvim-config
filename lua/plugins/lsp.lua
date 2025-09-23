@@ -32,9 +32,87 @@ return {
             if ok and blink.get_lsp_capabilities then
                 caps = blink.get_lsp_capabilities(caps)
             end
+            -- global toggle (default on) for semantic tokens
+            if vim.g.semantic_tokens_enabled == nil then
+                vim.g.semantic_tokens_enabled = true
+            end
+
+            -- Fallback linking for common semantic token highlight groups if theme doesn't define them.
+            local function ensure_semantic_hl_links()
+                local links = {
+                    ["@lsp.type.variable"] = "@variable",
+                    ["@lsp.type.parameter"] = "@parameter",
+                    ["@lsp.type.property"] = "@property",
+                    ["@lsp.type.function"] = "@function",
+                    ["@lsp.type.method"] = "@method",
+                    ["@lsp.type.namespace"] = "@namespace",
+                    ["@lsp.type.class"] = "@type",
+                    ["@lsp.typemod.variable.readonly"] = "@constant",
+                }
+                for group, target in pairs(links) do
+                    local ok_hl = pcall(vim.api.nvim_get_hl, 0, { name = group })
+                    if not ok_hl then
+                        pcall(vim.api.nvim_set_hl, 0, group, { link = target })
+                    end
+                end
+            end
+
+            ensure_semantic_hl_links()
+
+            local function enable_semantic_tokens(client, bufnr)
+                if not vim.g.semantic_tokens_enabled then return end
+                local caps = client.server_capabilities
+                if caps and caps.semanticTokensProvider and caps.semanticTokensProvider.full then
+                    -- Start semantic tokens for this buffer/client pair
+                    pcall(vim.lsp.semantic_tokens.start, bufnr, client.id)
+                    -- Refresh on edits & mode transitions (avoid spamming)
+                    vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
+                        buffer = bufnr,
+                        callback = function()
+                            if vim.api.nvim_buf_is_valid(bufnr)
+                                and client.server_capabilities.semanticTokensProvider then
+                                pcall(vim.lsp.semantic_tokens.refresh, bufnr)
+                            end
+                        end,
+                    })
+                end
+            end
+
+            -- User command to toggle semantic tokens globally
+            if not vim.g._semantic_tokens_toggle_defined then
+                vim.api.nvim_create_user_command("SemanticTokensToggle", function()
+                    vim.g.semantic_tokens_enabled = not vim.g.semantic_tokens_enabled
+                    local state = vim.g.semantic_tokens_enabled and "enabled" or "disabled"
+                    print("Semantic tokens " .. state)
+                    -- Apply state to all attached buffers
+                    for _, client in pairs(vim.lsp.get_clients()) do
+                        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+                            if vim.lsp.buf_is_attached(buf, client.id) then
+                                if vim.g.semantic_tokens_enabled then
+                                    enable_semantic_tokens(client, buf)
+                                else
+                                    pcall(vim.lsp.semantic_tokens.stop, buf, client.id)
+                                end
+                            end
+                        end
+                    end
+                end, {})
+                vim.g._semantic_tokens_toggle_defined = true
+            end
+
             local on_attach = function(client, bufnr)
-                client.server_capabilities.semanticTokensProvider = nil
                 vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+
+                -- Local helper for capability checks
+                local function supports(method)
+                    for _, c in pairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+                        if c.supports_method and c.supports_method(method) then
+                            return true
+                        end
+                    end
+                    return false
+                end
+
                 local map = function(m, lhs, rhs)
                     vim.keymap.set(m, lhs, rhs, { buffer = bufnr, silent = true })
                 end
@@ -44,11 +122,12 @@ return {
                 map("n", "<leader>rn", vim.lsp.buf.rename)
                 map("n", "<leader>ca", vim.lsp.buf.code_action)
                 map("n", "<leader>f", function()
-                    if supports(bufnr, "textDocument/formatting") then
+                    if supports("textDocument/formatting") then
                         vim.lsp.buf.format({ async = false })
-                    else
                     end
                 end)
+
+                enable_semantic_tokens(client, bufnr)
             end
 
             local lspconfig = require("lspconfig")

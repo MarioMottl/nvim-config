@@ -1,5 +1,5 @@
 -- Set relative line numbers in visual mode, absolute in insert mode
-vim.api.nvim_create_autocmd({"InsertEnter"}, {
+vim.api.nvim_create_autocmd("InsertEnter", {
     callback = function()
         vim.opt.relativenumber = false
         vim.opt.number = true
@@ -8,7 +8,8 @@ vim.api.nvim_create_autocmd({"InsertEnter"}, {
 
 vim.api.nvim_create_autocmd({"InsertLeave", "ModeChanged"}, {
     callback = function()
-        if vim.fn.mode():match("v") then
+        local mode = vim.fn.mode()
+        if mode == "n" or mode:match("v") then
             vim.opt.relativenumber = true
             vim.opt.number = true
         end

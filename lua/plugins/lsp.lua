@@ -60,7 +60,9 @@ return {
             ensure_semantic_hl_links()
 
             local function enable_semantic_tokens(client, bufnr)
-                if not vim.g.semantic_tokens_enabled then return end
+                if not vim.g.semantic_tokens_enabled then
+                    return
+                end
                 local caps = client.server_capabilities
                 if caps and caps.semanticTokensProvider and caps.semanticTokensProvider.full then
                     -- Start semantic tokens for this buffer/client pair
@@ -69,8 +71,10 @@ return {
                     vim.api.nvim_create_autocmd({ "TextChanged", "InsertLeave" }, {
                         buffer = bufnr,
                         callback = function()
-                            if vim.api.nvim_buf_is_valid(bufnr)
-                                and client.server_capabilities.semanticTokensProvider then
+                            if
+                                vim.api.nvim_buf_is_valid(bufnr)
+                                and client.server_capabilities.semanticTokensProvider
+                            then
                                 pcall(vim.lsp.semantic_tokens.refresh, bufnr)
                             end
                         end,
@@ -131,26 +135,9 @@ return {
             end
 
             local lspconfig = require("lspconfig")
+            -- removed clangd because I cant get it to work on NixOs
             for _, name in ipairs({ "rust_analyzer", "pyright", "bashls", "marksman" }) do
                 lspconfig[name].setup({ capabilities = caps, on_attach = on_attach })
-            end
-
-            local clangd_path = vim.fn.exepath("clangd")
-            if clangd_path == "" then
-                vim.notify("clangd not found in PATH (start nvim inside your nix dev shell)", vim.log.levels.ERROR)
-            else
-                lspconfig.clangd.setup({
-                    cmd = {
-                        clangd_path,
-                        "--background-index",
-                        "--clang-tidy",
-                        "--header-insertion=iwyu",
-                        "--compile-commands-dir=build",
-                        "--query-driver=/nix/store/*/bin/*,/run/current-system/sw/bin/*,/usr/bin/*",
-                    },
-                    capabilities = caps,
-                    on_attach = on_attach,
-                })
             end
 
             lspconfig.lua_ls.setup({

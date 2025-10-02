@@ -6,7 +6,7 @@ vim.api.nvim_create_autocmd("InsertEnter", {
     end,
 })
 
-vim.api.nvim_create_autocmd({"InsertLeave", "ModeChanged"}, {
+vim.api.nvim_create_autocmd({ "InsertLeave", "ModeChanged" }, {
     callback = function()
         local mode = vim.fn.mode()
         if mode == "n" or mode:match("v") then
@@ -40,5 +40,15 @@ vim.api.nvim_create_autocmd("BufWritePre", {
                 end,
             })
         end
+    end,
+})
+
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+    pattern = "*.poi",
+    callback = function()
+        vim.opt_local.expandtab = true
+        vim.opt_local.shiftwidth = 4
+        vim.opt_local.softtabstop = 4
+        vim.opt_local.tabstop = 4
     end,
 })

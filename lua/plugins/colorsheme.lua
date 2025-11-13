@@ -1,7 +1,7 @@
 local active_theme = "naysayer"
 
--- kanso variants: "zen", "ink", "pearl"
-local kanso_variant = "zen"
+-- kanso variants: "zen", "ink", "mist", "pearl"
+local kanso_variant = "ink"
 
 if active_theme == "kanso" then
     return {

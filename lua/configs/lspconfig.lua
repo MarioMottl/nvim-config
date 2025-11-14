@@ -5,6 +5,7 @@ local servers = {
     "rust_analyzer",
     "html",
     "cssls",
+    "clangd",
 }
 
 vim.lsp.enable(servers)

@@ -1,4 +1,4 @@
-local active_theme = "naysayer"
+local active_theme = "gruvbox"
 
 -- kanso variants: "zen", "ink", "mist", "pearl"
 local kanso_variant = "ink"
@@ -39,6 +39,30 @@ elseif active_theme == "naysayer" then
             "LazyVim/LazyVim",
             opts = {
                 colorscheme = "naysayer",
+            },
+        },
+    }
+elseif active_theme == "gruvbox" then
+    return {
+        {
+            "ellisonleao/gruvbox.nvim",
+            name = "gruvbox",
+            lazy = false,
+            priority = 1000,
+            opts = {
+                contrast = "hard", -- dark hard
+                -- you can add other options here if you want
+            },
+            config = function(_, opts)
+                vim.o.background = "dark"
+                require("gruvbox").setup(opts)
+                vim.cmd("colorscheme gruvbox")
+            end,
+        },
+        {
+            "LazyVim/LazyVim",
+            opts = {
+                colorscheme = "gruvbox",
             },
         },
     }

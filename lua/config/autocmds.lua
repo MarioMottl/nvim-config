@@ -1,8 +1,22 @@
--- Autocmds are automatically loaded on the VeryLazy event
--- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
---
--- Add any additional autocmds here
--- with `vim.api.nvim_create_autocmd`
---
--- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
--- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
+-- Normal Mode -> relative line numbers | Insert Mode -> absolute line numbers
+vim.opt.number = true
+
+local autocmd = vim.api.nvim_create_autocmd
+
+autocmd({ "BufEnter", "FocusGained", "InsertLeave", "WinEnter" }, {
+    pattern = "*",
+    callback = function()
+        if vim.wo.number and vim.api.nvim_get_mode().mode ~= "i" then
+            vim.wo.relativenumber = true
+        end
+    end,
+})
+
+autocmd({ "BufLeave", "FocusLost", "InsertEnter", "WinLeave" }, {
+    pattern = "*",
+    callback = function()
+        if vim.wo.number then
+            vim.wo.relativenumber = false
+        end
+    end,
+})

@@ -51,7 +51,13 @@ elseif active_theme == "gruvbox" then
             priority = 1000,
             opts = {
                 contrast = "hard", -- dark hard
-                -- you can add other options here if you want
+                italic = {
+                    strings = false,
+                    emphasis = false,
+                    comments = false,
+                    operators = false,
+                    folds = false,
+                },
             },
             config = function(_, opts)
                 vim.o.background = "dark"

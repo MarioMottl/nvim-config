@@ -1,7 +1,7 @@
 local active_theme = "gruvbox"
 
 -- kanso variants: "zen", "ink", "mist", "pearl"
-local kanso_variant = "ink"
+local kanso_variant = "zen"
 
 if active_theme == "kanso" then
     return {

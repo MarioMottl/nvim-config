@@ -1,4 +1,4 @@
-local active_theme = "gruvbox"
+local active_theme = "naysayer"
 
 -- kanso variants: "zen", "ink", "mist", "pearl"
 local kanso_variant = "zen"

@@ -1,3 +1,9 @@
+-- Load persisted completion state before blink.cmp initializes.
+do
+  local s = require("config.state").load()
+  vim.g.blink_cmp_manual = s.blink_cmp_manual == true
+end
+
 return {
     {
         "saghen/blink.cmp",
@@ -10,15 +16,37 @@ return {
                 end,
                 desc = "Toggle Blink CMP",
             },
+            {
+                "<leader>uk",
+                function()
+                    toggle_blink_cmp_manual()
+                end,
+                desc = "Toggle completion auto/manual",
+            },
         },
         config = function()
-            -- Define a global toggle function so that the keys mapping can call it.
             function _G.toggle_blink_cmp()
                 vim.g.blink_cmp_enabled = not vim.g.blink_cmp_enabled
                 print("Blink CMP is now " .. (vim.g.blink_cmp_enabled and "enabled" or "disabled"))
             end
 
-            -- Set the global toggle variable to true by default.
+            -- Toggle between auto-show and manual-only (C-Space) completion.
+            function _G.toggle_blink_cmp_manual()
+                vim.g.blink_cmp_manual = not vim.g.blink_cmp_manual
+                local cfg = require("blink.cmp.config")
+                cfg.completion.trigger.show_on_keyword = not vim.g.blink_cmp_manual
+                cfg.completion.trigger.show_on_trigger_character = not vim.g.blink_cmp_manual
+                local st = require("config.state")
+                local s = st.load()
+                s.blink_cmp_manual = vim.g.blink_cmp_manual
+                st.save(s)
+                vim.notify(
+                    "Completion: " .. (vim.g.blink_cmp_manual and "manual (<C-Space> to show)" or "auto"),
+                    vim.log.levels.INFO,
+                    { title = "Blink" }
+                )
+            end
+
             vim.g.blink_cmp_enabled = true
             require("blink.cmp").setup({
                 -- The enabled function checks that:
@@ -39,8 +67,8 @@ return {
 
                 completion = {
                     trigger = {
-                        show_on_keyword = true,
-                        show_on_trigger_character = true,
+                        show_on_keyword = not vim.g.blink_cmp_manual,
+                        show_on_trigger_character = not vim.g.blink_cmp_manual,
                     },
                 },
 

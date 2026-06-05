@@ -6,3 +6,6 @@ vim.opt.clipboard = "unnamedplus"
 
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
+vim.opt.conceallevel = 0
+
+vim.g.trouble_lualine = false

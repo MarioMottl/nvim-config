@@ -338,6 +338,8 @@ elseif active_theme == "sitruuna" then
             priority = 1000,
             config = function()
                 vim.cmd("colorscheme sitruuna")
+                vim.api.nvim_set_hl(0, "StatusLine", { fg = "#9da1a3", bg = "#181a1b" })
+                vim.api.nvim_set_hl(0, "StatusLineNC", { fg = "#9da1a3", bg = "#181a1b" })
             end,
         },
         {

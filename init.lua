@@ -1,9 +1,16 @@
-require("config.lazy")
+local lsp_log = vim.lsp.log.get_filename()
+local max_lsp_log_size = 10 * 1024 * 1024
 
-vim.opt.clipboard = "unnamedplus"
-vim.o.number = true
-vim.o.relativenumber = false
-vim.opt.list = true
+local stat = vim.uv.fs_stat(lsp_log)
+if stat and stat.size > max_lsp_log_size then
+    local fd = vim.uv.fs_open(lsp_log, "w", 420)
+    if fd then
+        vim.uv.fs_close(fd)
+    end
+end
 
-vim.keymap.set("x", "p", '"_dP', { noremap = true, silent = true })
-vim.keymap.set("x", "P", '"_dP', { noremap = true, silent = true })
+vim.lsp.log.set_level(vim.log.levels.ERROR)
+
+require("mario.core")
+require("mario.lazy")
+

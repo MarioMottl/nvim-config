@@ -10,6 +10,7 @@ opt.autoindent = true
 opt.smartindent = true
 opt.copyindent = true
 opt.preserveindent = true
+opt.cmdheight = 0
 
 opt.wrap = false
 opt.ignorecase = true

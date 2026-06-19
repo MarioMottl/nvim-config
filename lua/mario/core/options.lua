@@ -11,6 +11,7 @@ opt.smartindent = true
 opt.copyindent = true
 opt.preserveindent = true
 opt.cmdheight = 0
+opt.conceallevel = 0
 
 opt.wrap = false
 opt.ignorecase = true
@@ -23,11 +24,13 @@ opt.backspace = "indent,eol,start"
 opt.clipboard:append("unnamedplus")
 opt.splitright = true
 opt.splitbelow = true
-opt.conceallevel = 0
 opt.list = true
 
 opt.foldmethod = "marker"
 opt.foldmarker = "#pragma region,#pragma endregion"
+
+ -- don't show "written" message on save
+opt.shortmess:append("W")
 
 vim.api.nvim_create_autocmd("FileType", {
     callback = function(args)

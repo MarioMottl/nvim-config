@@ -7,9 +7,9 @@ return {
             smear_insert_mode = false,
             min_vertical_distance_smear = 2,
             min_horizontal_distance_smear = 2,
-            time_interval = 17,
+            time_interval = 10,
             stiffness = 0.9,
-            trailing_stiffness = 0.4,
+            trailing_stiffness = 0.7,
             damping = 0.99,
         })
     end,

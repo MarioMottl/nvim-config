@@ -9,20 +9,6 @@ return {
         local cmp_nvim_lsp = require("cmp_nvim_lsp")
         local keymap = vim.keymap
 
-        -- Filter clangd noise (Qt flag warnings)
-        local qt_flag_pat = "^Unknown argument:%s*['\"]?%-mno%-direct%-extern%-access['\"]?"
-        local orig_publish = vim.lsp.handlers["textDocument/publishDiagnostics"]
-        vim.lsp.handlers["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
-            local client = ctx and vim.lsp.get_client_by_id(ctx.client_id)
-            if client and client.name == "clangd" and result and result.diagnostics then
-                result = vim.deepcopy(result)
-                result.diagnostics = vim.tbl_filter(function(d)
-                    return not (d.message or ""):match(qt_flag_pat)
-                end, result.diagnostics)
-            end
-            return orig_publish(err, result, ctx, config)
-        end
-
         -- Keymaps on LspAttach
         vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup("MarioLspConfig", {}),
@@ -133,7 +119,10 @@ return {
                         filter = function(client) return client.name == "clangd" end,
                     })
                 elseif vim.tbl_contains(fmt_fts, ft) then
-                    vim.lsp.buf.format({ bufnr = ev.buf, async = false })
+                    local clients = vim.lsp.get_clients({ bufnr = ev.buf, method = "textDocument/formatting" })
+                    if #clients > 0 then
+                        vim.lsp.buf.format({ bufnr = ev.buf, async = false })
+                    end
                 end
             end,
         })

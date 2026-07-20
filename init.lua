@@ -9,6 +9,16 @@ if stat and stat.size > max_lsp_log_size then
     end
 end
 
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    local groups = { "Normal", "NormalNC", "NormalFloat", "SignColumn",
+                      "EndOfBuffer", "LineNr", "FoldColumn", "MsgArea" }
+    for _, g in ipairs(groups) do
+      vim.api.nvim_set_hl(0, g, { bg = "none" })
+    end
+  end,
+})
+
 vim.lsp.log.set_level(vim.log.levels.ERROR)
 
 require("mario.core")

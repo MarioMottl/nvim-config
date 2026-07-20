@@ -75,6 +75,9 @@ return {
         })
 
         local capabilities = cmp_nvim_lsp.default_capabilities()
+        -- Ask language servers for plain completion text instead of function-call
+        -- snippets with argument placeholders (for example, print(fmt, args)).
+        capabilities.textDocument.completion.completionItem.snippetSupport = false
 
         -- Diagnostic signs
         local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }

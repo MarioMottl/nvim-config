@@ -85,6 +85,7 @@ Leader key: `Space`
 | `<leader>ch` | n | LSP implementations |
 | `<leader>cu` | n | LSP references |
 | `<leader>ct` | n | Toggle diagnostics on save |
+| `<leader>cc` | n | Toggle completion (keeps LSP active) |
 | `<leader>cL` | n | Toggle LSP on/off |
 
 ## Git (gitsigns)

@@ -21,6 +21,9 @@ return {
         require("luasnip.loaders.from_vscode").lazy_load()
 
         cmp.setup({
+            enabled = function()
+                return vim.g.cmp_enabled ~= false
+            end,
             completion = { completeopt = "menu,menuone,noinsert" },
             preselect = cmp.PreselectMode.Item,
             snippet = {

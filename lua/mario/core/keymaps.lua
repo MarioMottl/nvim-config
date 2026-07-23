@@ -80,6 +80,22 @@ keymap.set("n", "<leader>ct", function()
     )
 end, { desc = "Toggle diagnostics on save" })
 
+-- Toggle completion without stopping LSP features such as diagnostics
+vim.g.cmp_enabled = vim.g.cmp_enabled ~= false
+
+keymap.set("n", "<leader>cc", function()
+    vim.g.cmp_enabled = not vim.g.cmp_enabled
+
+    if not vim.g.cmp_enabled and package.loaded.cmp then
+        require("cmp").abort()
+    end
+
+    vim.notify(
+        "Completion: " .. (vim.g.cmp_enabled and "ON" or "OFF (LSP still active)"),
+        vim.log.levels.INFO, { title = "nvim-cmp" }
+    )
+end, { desc = "Toggle completion" })
+
 -- Toggle LSP
 keymap.set("n", "<leader>cL", function()
     local bufnr = vim.api.nvim_get_current_buf()

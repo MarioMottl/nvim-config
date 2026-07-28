@@ -62,6 +62,41 @@ Leader key: `Space`
 | `<leader>fw` | n | Live grep |
 | `<leader>fc` | n | Grep word under cursor |
 | `<leader>fb` | n | Find buffers |
+| `<C-t>` | Telescope | Open results in Trouble |
+
+## Trouble
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>qD` | n | Workspace diagnostics |
+| `<leader>qd` | n | Buffer diagnostics |
+| `<leader>qq` | n | Quickfix list |
+| `<leader>ql` | n | Location list |
+| `<leader>qs` | n | Document symbols |
+
+## Structural Editing
+
+### Mini Surround
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `sa` | n/x | Add surrounding |
+| `sd` | n | Delete surrounding |
+| `sr` | n | Replace surrounding |
+| `sf` / `sF` | n | Find surrounding right/left |
+| `sh` | n | Highlight surrounding |
+
+### Treesitter Text Objects
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `af` / `if` | x/o | Around/inside function |
+| `ac` / `ic` | x/o | Around/inside class |
+| `aa` / `ia` | x/o | Around/inside argument |
+| `]m` / `[m` | n/x/o | Next/previous function |
+| `]]` / `[[` | n/x/o | Next/previous class |
+| `<leader>sn` | n | Swap with next argument |
+| `<leader>sp` | n | Swap with previous argument |
 
 ## LSP (active when LSP attached)
 

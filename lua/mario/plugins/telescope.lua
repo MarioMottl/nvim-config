@@ -26,7 +26,7 @@ return {
                     i = {
                         ["<C-k>"] = actions.move_selection_previous,
                         ["<C-j>"] = actions.move_selection_next,
-                        ["<C-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
+                        ["<C-q>"] = actions.smart_send_to_qflist + actions.open_qflist,
                         ["<C-t>"] = open_with_trouble,
                     },
                     n = { ["<C-t>"] = open_with_trouble },

@@ -36,7 +36,7 @@ return {
                 opts.desc = "Show LSP type definitions"
                 keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts)
 
-                opts.desc = "Code actions"
+                opts.desc = "Show available code actions"
                 keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
 
                 opts.desc = "Smart rename"
@@ -106,7 +106,9 @@ return {
                 fallbackFlags = { "-std=c++20" },
             },
         })
-        vim.lsp.enable("clangd")
+        if vim.g.lsp_enabled then
+            vim.lsp.enable("clangd")
+        end
 
         -- Auto-format on save
         vim.api.nvim_create_autocmd("BufWritePre", {
@@ -148,13 +150,17 @@ return {
                 },
             },
         })
-        vim.lsp.enable("rust_analyzer")
+        if vim.g.lsp_enabled then
+            vim.lsp.enable("rust_analyzer")
+        end
 
         -- ZLS (Zig)
         vim.lsp.config("zls", {
             capabilities = capabilities,
         })
-        vim.lsp.enable("zls")
+        if vim.g.lsp_enabled then
+            vim.lsp.enable("zls")
+        end
 
         -- Lua LS
         vim.lsp.config("lua_ls", {
@@ -171,6 +177,8 @@ return {
                 },
             },
         })
-        vim.lsp.enable("lua_ls")
+        if vim.g.lsp_enabled then
+            vim.lsp.enable("lua_ls")
+        end
     end,
 }

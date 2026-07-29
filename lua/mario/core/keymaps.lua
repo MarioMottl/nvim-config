@@ -1,6 +1,7 @@
 vim.g.mapleader = " "
 
 local keymap = vim.keymap
+local state = require("mario.core.state")
 
 -- Paste without clobbering register in visual mode
 keymap.set("x", "p", '"_dP', { noremap = true, silent = true })
@@ -44,10 +45,10 @@ end, { desc = "Delete buffer (keep split)" })
 keymap.set("n", "<leader>n", "<cmd>tabnew<CR>", { desc = "New tab" })
 
 -- LSP extras (Telescope)
-keymap.set("n", "<leader>ci", "<cmd>Telescope lsp_incoming_calls<CR>", { desc = "LSP incoming calls" })
-keymap.set("n", "<leader>co", "<cmd>Telescope lsp_outgoing_calls<CR>", { desc = "LSP outgoing calls" })
-keymap.set("n", "<leader>ch", "<cmd>Telescope lsp_implementations<CR>", { desc = "LSP implementations" })
-keymap.set("n", "<leader>cu", "<cmd>Telescope lsp_references<CR>",      { desc = "LSP references" })
+keymap.set("n", "<leader>ci", "<cmd>Telescope lsp_incoming_calls<CR>", { desc = "Find callers of this function" })
+keymap.set("n", "<leader>co", "<cmd>Telescope lsp_outgoing_calls<CR>", { desc = "Find functions called from here" })
+keymap.set("n", "<leader>ch", "<cmd>Telescope lsp_implementations<CR>", { desc = "Find implementations" })
+keymap.set("n", "<leader>cu", "<cmd>Telescope lsp_references<CR>",      { desc = "Find references and usages" })
 
 -- Search pattern → quickfix
 keymap.set("n", "<leader>sq", function()
@@ -70,21 +71,23 @@ keymap.set("n", "<leader>tn", "<cmd>ThemeNext<CR>",  { desc = "Next theme" })
 keymap.set("n", "<leader>tp", "<cmd>ThemePrev<CR>",  { desc = "Prev theme" })
 
 -- Toggle diagnostics on save
-vim.g.lsp_diag_on_save = true
+vim.g.lsp_diag_on_save = state.get("lsp_diag_on_save", true)
 
 keymap.set("n", "<leader>ct", function()
     vim.g.lsp_diag_on_save = not vim.g.lsp_diag_on_save
+    state.set("lsp_diag_on_save", vim.g.lsp_diag_on_save)
     vim.notify(
         "Diagnostics on save: " .. (vim.g.lsp_diag_on_save and "ON" or "OFF (real-time)"),
         vim.log.levels.INFO, { title = "LSP" }
     )
-end, { desc = "Toggle diagnostics on save" })
+end, { desc = "Toggle diagnostics: save/live" })
 
 -- Toggle completion without stopping LSP features such as diagnostics
-vim.g.cmp_enabled = vim.g.cmp_enabled ~= false
+vim.g.cmp_enabled = state.get("cmp_enabled", true)
 
 keymap.set("n", "<leader>cc", function()
     vim.g.cmp_enabled = not vim.g.cmp_enabled
+    state.set("cmp_enabled", vim.g.cmp_enabled)
 
     if not vim.g.cmp_enabled and package.loaded.cmp then
         require("cmp").abort()
@@ -94,17 +97,33 @@ keymap.set("n", "<leader>cc", function()
         "Completion: " .. (vim.g.cmp_enabled and "ON" or "OFF (LSP still active)"),
         vim.log.levels.INFO, { title = "nvim-cmp" }
     )
-end, { desc = "Toggle completion" })
+end, { desc = "Toggle completion popup" })
 
 -- Toggle LSP
+vim.g.lsp_enabled = state.get("lsp_enabled", true)
+
 keymap.set("n", "<leader>cL", function()
-    local bufnr = vim.api.nvim_get_current_buf()
-    local clients = vim.lsp.get_clients({ bufnr = bufnr })
-    if #clients > 0 then
-        vim.lsp.stop_client(clients)
-        vim.notify("LSP stopped", vim.log.levels.WARN, { title = "LSP" })
-    else
-        vim.api.nvim_exec_autocmds("FileType", { buf = bufnr })
-        vim.notify("LSP started", vim.log.levels.INFO, { title = "LSP" })
+    vim.g.lsp_enabled = not vim.g.lsp_enabled
+    state.set("lsp_enabled", vim.g.lsp_enabled)
+
+    local servers = { "clangd", "rust_analyzer", "zls", "lua_ls" }
+    require("lazy").load({ plugins = { "nvim-lspconfig" } })
+    for _, server in ipairs(servers) do
+        vim.lsp.enable(server, vim.g.lsp_enabled)
     end
-end, { desc = "Toggle LSP" })
+
+    if not vim.g.lsp_enabled then
+        local clients = vim.tbl_filter(function(client)
+            return vim.tbl_contains(servers, client.name)
+        end, vim.lsp.get_clients())
+        for _, client in ipairs(clients) do
+            client:stop()
+        end
+    end
+
+    vim.notify(
+        "Language servers: " .. (vim.g.lsp_enabled and "ON" or "OFF"),
+        vim.g.lsp_enabled and vim.log.levels.INFO or vim.log.levels.WARN,
+        { title = "LSP" }
+    )
+end, { desc = "Toggle language server" })

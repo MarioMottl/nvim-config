@@ -11,7 +11,22 @@ function M.load()
 end
 
 function M.save(tbl)
+    vim.fn.mkdir(vim.fn.fnamemodify(path, ":h"), "p")
     pcall(vim.fn.writefile, { vim.fn.json_encode(tbl) }, path)
+end
+
+function M.get(key, default)
+    local value = M.load()[key]
+    if value == nil then
+        return default
+    end
+    return value
+end
+
+function M.set(key, value)
+    local values = M.load()
+    values[key] = value
+    M.save(values)
 end
 
 return M

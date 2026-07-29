@@ -47,5 +47,6 @@
   "thorn": { "branch": "refactor/theme-change", "commit": "f382e2f8b4a7d3e17ac22e1d52ff71f3722507f2" },
   "tokyonight.nvim": { "branch": "main", "commit": "cdc07ac78467a233fd62c493de29a17e0cf2b2b6" },
   "torchlight": { "branch": "main", "commit": "5ba0258a686fa7b7c367b218970a9005a6d5ee97" },
-  "trouble.nvim": { "branch": "main", "commit": "bd67efe408d4816e25e8491cc5ad4088e708a69a" }
+  "trouble.nvim": { "branch": "main", "commit": "bd67efe408d4816e25e8491cc5ad4088e708a69a" },
+  "which-key.nvim": { "branch": "main", "commit": "3aab2147e74890957785941f0c1ad87d0a44c15a" }
 }

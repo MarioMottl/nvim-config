@@ -9,6 +9,7 @@ Leader key: `Space`
 | `p` / `P` | visual | Paste without clobbering register |
 | `J` | visual | Move selection down |
 | `K` | visual | Move selection up |
+| `<leader>cw` | n | Toggle which-key popup for this session |
 
 ## Buffers
 
@@ -34,6 +35,16 @@ Leader key: `Space`
 | `<C-Down>` | n | Shorter |
 | `<C-Left>` | n | Narrower |
 | `<C-Right>` | n | Wider |
+
+## Terminal
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>tf` | n/t | Toggle floating terminal |
+| `<leader>th` | n | Open horizontal terminal |
+| `<leader>tv` | n | Open vertical terminal |
+| `<Esc><Esc>` | terminal | Leave terminal mode |
+| `<C-h/j/k/l>` | terminal | Move between windows |
 
 ## Scroll (neoscroll)
 
@@ -62,6 +73,7 @@ Leader key: `Space`
 | `<leader>fw` | n | Live grep |
 | `<leader>fc` | n | Grep word under cursor |
 | `<leader>fb` | n | Find buffers |
+| `<leader>fk` | n | Find keymaps |
 | `<C-t>` | Telescope | Open results in Trouble |
 
 ## Trouble
@@ -108,20 +120,20 @@ Leader key: `Space`
 | `gi` | n | Show implementations |
 | `gt` | n | Show type definitions |
 | `K` | n | Hover docs |
-| `<leader>ca` | n/v | Code actions |
+| `<leader>ca` | n/v | Show available code actions |
 | `<leader>rn` | n | Rename symbol |
 | `<leader>D` | n | Buffer diagnostics |
 | `<leader>d` | n | Line diagnostics |
 | `[d` | n | Prev diagnostic |
 | `]d` | n | Next diagnostic |
 | `<leader>rs` | n | Restart LSP |
-| `<leader>ci` | n | LSP incoming calls |
-| `<leader>co` | n | LSP outgoing calls |
-| `<leader>ch` | n | LSP implementations |
-| `<leader>cu` | n | LSP references |
-| `<leader>ct` | n | Toggle diagnostics on save |
-| `<leader>cc` | n | Toggle completion (keeps LSP active) |
-| `<leader>cL` | n | Toggle LSP on/off |
+| `<leader>ci` | n | Find callers of this function |
+| `<leader>co` | n | Find functions called from here |
+| `<leader>ch` | n | Find implementations |
+| `<leader>cu` | n | Find references and usages |
+| `<leader>ct` | n | Toggle diagnostics between save/live (persistent) |
+| `<leader>cc` | n | Toggle completion popup (persistent; keeps LSP active) |
+| `<leader>cL` | n | Toggle language servers globally (persistent) |
 
 ## Git (gitsigns)
 

@@ -41,5 +41,6 @@ return {
         keymap.set("n", "<leader>fw", "<cmd>Telescope live_grep<cr>",   { desc = "Live grep" })
         keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Grep word under cursor" })
         keymap.set("n", "<leader>fb", "<cmd>Telescope buffers<cr>",     { desc = "Find buffers" })
+        keymap.set("n", "<leader>fk", "<cmd>Telescope keymaps<cr>",     { desc = "Find keymaps" })
     end,
 }

@@ -6,21 +6,10 @@ return {
 
         lualine.setup({
             options = {
+                icons_enabled = true,
                 theme = "auto",
-                section_separators = "",
-                component_separators = "",
-            },
-            sections = {
-                lualine_b = {
-                    {
-                        function()
-                            local reg = vim.fn.reg_recording()
-                            if reg == "" then return "" end
-                            return "recording @" .. reg
-                        end,
-                    },
-                },
-                lualine_x = { { "encoding" }, { "fileformat" }, { "filetype" } },
+                section_separators = { left = "", right = "" },
+                component_separators = { left = "", right = "" },
             },
         })
 

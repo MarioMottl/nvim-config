@@ -24,3 +24,5 @@ vim.lsp.log.set_level(vim.log.levels.ERROR)
 require("mario.core")
 require("mario.lazy")
 
+-- Let :compiler discover definitions in lua/mario/compiler/.
+vim.opt.runtimepath:append(vim.fn.stdpath("config") .. "/lua/mario")

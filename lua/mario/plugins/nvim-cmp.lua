@@ -21,10 +21,10 @@ return {
         require("luasnip.loaders.from_vscode").lazy_load()
 
         cmp.setup({
-            enabled = function()
-                return vim.g.cmp_enabled ~= false
-            end,
-            completion = { completeopt = "menu,menuone,noinsert" },
+            completion = {
+                autocomplete = not vim.g.cmp_manual and { cmp.TriggerEvent.TextChanged } or false,
+                completeopt = "menu,menuone,noinsert",
+            },
             preselect = cmp.PreselectMode.Item,
             snippet = {
                 expand = function(args)
@@ -37,6 +37,8 @@ return {
                 ["<C-b>"]     = cmp.mapping.scroll_docs(-4),
                 ["<C-f>"]     = cmp.mapping.scroll_docs(4),
                 ["<C-Space>"] = cmp.mapping.complete(),
+                -- Some terminals send Ctrl-Space as Ctrl-@ (NUL).
+                ["<C-@>"]     = cmp.mapping.complete(),
                 ["<C-e>"]     = cmp.mapping.abort(),
                 ["<CR>"]      = cmp.mapping.confirm({ select = true }),
             }),

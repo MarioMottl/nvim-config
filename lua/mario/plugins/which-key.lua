@@ -37,13 +37,19 @@ return {
             {
                 "<leader>cc",
                 desc = function()
-                    return "Completion popup [" .. (vim.g.cmp_enabled and "ON" or "OFF") .. "]"
+                    return "Completion mode [" .. (vim.g.cmp_manual and "MANUAL" or "AUTO") .. "]"
                 end,
             },
             {
                 "<leader>cL",
                 desc = function()
                     return "Language servers [" .. (vim.g.lsp_enabled and "ON" or "OFF") .. "]"
+                end,
+            },
+            {
+                "<leader>cI",
+                desc = function()
+                    return "Inlay hints [" .. (vim.g.inlay_hints_enabled and "ON" or "OFF") .. "]"
                 end,
             },
             {

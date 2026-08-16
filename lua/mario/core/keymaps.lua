@@ -82,22 +82,59 @@ keymap.set("n", "<leader>ct", function()
     )
 end, { desc = "Toggle diagnostics: save/live" })
 
--- Toggle completion without stopping LSP features such as diagnostics
-vim.g.cmp_enabled = state.get("cmp_enabled", true)
+-- Toggle between automatic completion popups and manual-only completion.
+-- In manual mode, <C-Space> still opens the completion menu in insert mode.
+vim.g.cmp_manual = state.get("cmp_manual", false)
 
 keymap.set("n", "<leader>cc", function()
-    vim.g.cmp_enabled = not vim.g.cmp_enabled
-    state.set("cmp_enabled", vim.g.cmp_enabled)
+    vim.g.cmp_manual = not vim.g.cmp_manual
+    state.set("cmp_manual", vim.g.cmp_manual)
 
-    if not vim.g.cmp_enabled and package.loaded.cmp then
-        require("cmp").abort()
+    require("lazy").load({ plugins = { "nvim-cmp" } })
+    local cmp = require("cmp")
+    cmp.abort()
+    cmp.setup({
+        completion = {
+            autocomplete = not vim.g.cmp_manual and { cmp.TriggerEvent.TextChanged } or false,
+        },
+    })
+
+    vim.notify(
+        "Completion: " .. (vim.g.cmp_manual and "manual (<C-Space> to show)" or "auto"),
+        vim.log.levels.INFO,
+        { title = "nvim-cmp" }
+    )
+end, { desc = "Toggle completion auto/manual" })
+
+-- Toggle inlay hints globally and remember the choice across restarts.
+vim.g.inlay_hints_enabled = state.get("inlay_hints_enabled", true)
+
+keymap.set("n", "<leader>cI", function()
+    vim.g.inlay_hints_enabled = not vim.g.inlay_hints_enabled
+    state.set("inlay_hints_enabled", vim.g.inlay_hints_enabled)
+
+    for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+        if vim.api.nvim_buf_is_loaded(bufnr) then
+            local ft = vim.bo[bufnr].filetype
+            local path = vim.api.nvim_buf_get_name(bufnr)
+            local excluded = vim.tbl_contains({ "c", "cpp", "objc", "objcpp" }, ft)
+                or path:match("%.h$") or path:match("%.hh$")
+                or path:match("%.hpp$") or path:match("%.hxx$")
+                or path:match("%.inl$")
+
+            vim.lsp.inlay_hint.enable(
+                vim.g.inlay_hints_enabled and not excluded,
+                { bufnr = bufnr }
+            )
+        end
     end
 
     vim.notify(
-        "Completion: " .. (vim.g.cmp_enabled and "ON" or "OFF (LSP still active)"),
-        vim.log.levels.INFO, { title = "nvim-cmp" }
+        "Inlay hints: " .. (vim.g.inlay_hints_enabled and "ON" or "OFF"),
+        vim.log.levels.INFO,
+        { title = "LSP" }
     )
-end, { desc = "Toggle completion popup" })
+end, { desc = "Toggle inlay hints" })
 
 -- Toggle LSP
 vim.g.lsp_enabled = state.get("lsp_enabled", true)

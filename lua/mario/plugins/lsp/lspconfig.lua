@@ -68,7 +68,8 @@ return {
                     or path:match("%.hpp$") or path:match("%.hxx$")
                     or path:match("%.inl$")
 
-                if client and client.server_capabilities.inlayHintProvider and not no_hints then
+                if client and client.server_capabilities.inlayHintProvider
+                    and vim.g.inlay_hints_enabled and not no_hints then
                     vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
                 end
             end,

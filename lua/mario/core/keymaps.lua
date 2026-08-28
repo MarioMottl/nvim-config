@@ -49,6 +49,12 @@ keymap.set("n", "<leader>ci", "<cmd>Telescope lsp_incoming_calls<CR>", { desc = 
 keymap.set("n", "<leader>co", "<cmd>Telescope lsp_outgoing_calls<CR>", { desc = "Find functions called from here" })
 keymap.set("n", "<leader>ch", "<cmd>Telescope lsp_implementations<CR>", { desc = "Find implementations" })
 keymap.set("n", "<leader>cu", "<cmd>Telescope lsp_references<CR>",      { desc = "Find references and usages" })
+keymap.set("n", "<leader>cs", function()
+    require("mario.4coder.scope").toggle_backgrounds()
+end, { desc = "Toggle 4coder scope backgrounds" })
+keymap.set("n", "<leader>ck", function()
+    require("mario.4coder.signature").show()
+end, { desc = "Show function parameters" })
 
 -- Search pattern → quickfix
 keymap.set("n", "<leader>sq", function()

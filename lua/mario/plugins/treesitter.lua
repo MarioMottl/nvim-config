@@ -73,12 +73,8 @@ return {
         local parsers = {
             "bash", "c", "cpp", "json", "lua",
             "markdown", "markdown_inline",
-            "rust", "toml", "vim", "vimdoc", "yaml",
+            "rust", "toml", "vim", "vimdoc", "yaml", "zig",
         }
-
-        if vim.fn.executable("zig") == 1 then
-            table.insert(parsers, "zig")
-        end
 
         require("nvim-treesitter").install(parsers)
     end,

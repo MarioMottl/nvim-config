@@ -9,7 +9,7 @@ local supported = { c = true, cpp = true, rust = true, zig = true }
 -- A deep control-flow nest is still cheap: this is one range extmark per
 -- ancestor, not a per-line redraw.  Keep enough levels to show the complete
 -- path in real-world Rust match/loop code.
-local max_scopes = 32
+local max_scopes = 1
 
 local scope_types = {
     block = true, compound_statement = true, declaration_list = true,

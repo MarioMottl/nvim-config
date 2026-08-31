@@ -123,7 +123,7 @@ Leader key: `Space`
 | `<leader>ca` | n/v | Show available code actions |
 | `<leader>rn` | n | Rename symbol |
 | `<leader>D` | n | Buffer diagnostics |
-| `<leader>d` | n | Line diagnostics |
+| `<leader>d` | n | Show all diagnostics for the current line in a popup |
 | `[d` | n | Prev diagnostic |
 | `]d` | n | Next diagnostic |
 | `<leader>rs` | n | Restart LSP |

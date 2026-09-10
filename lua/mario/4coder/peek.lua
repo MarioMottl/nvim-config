@@ -10,7 +10,7 @@ local function close()
 end
 
 local function location(result)
-    if vim.tbl_islist(result) then result = result[1] end
+    if vim.islist(result) then result = result[1] end
     if not result then return end
     return result.targetUri or result.uri, result.targetRange or result.range
 end

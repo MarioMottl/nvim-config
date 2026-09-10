@@ -26,6 +26,9 @@ return {
                 completeopt = "menu,menuone,noinsert",
             },
             preselect = cmp.PreselectMode.Item,
+            window = {
+                completion = { max_height = 12 },
+            },
             snippet = {
                 expand = function(args)
                     luasnip.lsp_expand(args.body)

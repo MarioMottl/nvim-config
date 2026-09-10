@@ -17,7 +17,7 @@ return {
 	},
 	dependencies = {
 		"nvim-lua/plenary.nvim",
-		"nvim-telescope/telescope.nvim",
+		"folke/snacks.nvim",
 	},
 	init = function()
 		local group = vim.api.nvim_create_augroup("MarioObsidianMarkdown", { clear = true })

@@ -24,7 +24,7 @@ return {
                 opts.desc = "Show LSP references"
                 keymap.set("n", "gR", function()
                     require("mario.4coder.jump").after_lsp_jump()
-                    vim.cmd("Telescope lsp_references")
+                    Snacks.picker.lsp_references()
                 end, opts)
 
                 opts.desc = "Go to declaration"
@@ -42,13 +42,13 @@ return {
                 opts.desc = "Show LSP implementations"
                 keymap.set("n", "gi", function()
                     require("mario.4coder.jump").after_lsp_jump()
-                    vim.cmd("Telescope lsp_implementations")
+                    Snacks.picker.lsp_implementations()
                 end, opts)
 
                 opts.desc = "Show LSP type definitions"
                 keymap.set("n", "gt", function()
                     require("mario.4coder.jump").after_lsp_jump()
-                    vim.cmd("Telescope lsp_type_definitions")
+                    Snacks.picker.lsp_type_definitions()
                 end, opts)
 
                 opts.desc = "Peek LSP definition"
@@ -61,7 +61,7 @@ return {
                 keymap.set("n", "<leader>rn", vim.lsp.buf.rename, opts)
 
                 opts.desc = "Buffer diagnostics"
-                keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
+                keymap.set("n", "<leader>D", function() Snacks.picker.diagnostics_buffer() end, opts)
 
                 opts.desc = "Show diagnostics for current line"
                 keymap.set("n", "<leader>d", function()
@@ -79,7 +79,9 @@ return {
                 keymap.set("n", "]d", vim.diagnostic.goto_next, opts)
 
                 opts.desc = "Hover docs"
-                keymap.set("n", "K", vim.lsp.buf.hover, opts)
+                keymap.set("n", "K", function()
+                    vim.lsp.buf.hover({ border = "rounded" })
+                end, opts)
 
                 opts.desc = "Restart LSP"
                 keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts)

@@ -65,7 +65,7 @@ Leader key: `Space`
 | `<leader>e` | n | Focus NvimTree |
 | `<leader>ec` | n | Collapse all folders |
 
-## Telescope
+## Snacks Picker
 
 | Key | Mode | Description |
 |-----|------|-------------|
@@ -74,7 +74,13 @@ Leader key: `Space`
 | `<leader>fc` | n | Grep word under cursor |
 | `<leader>fb` | n | Find buffers |
 | `<leader>fk` | n | Find keymaps |
-| `<C-t>` | Telescope | Open results in Trouble |
+| `<C-j>` / `<C-k>` | Picker | Next / previous result |
+| `<C-q>` | Picker | Send selected or all results to quickfix |
+| `<C-t>` | Picker | Open selected or all results in Trouble |
+
+Code actions (`<leader>ca`) and other `vim.ui.select` menus use the Snacks popup.
+Code actions open without a search field: `j`/`k` move, `l` or Enter accepts,
+and `h` or Escape closes the popup.
 
 ## Trouble
 
@@ -123,7 +129,7 @@ Leader key: `Space`
 | `<leader>ca` | n/v | Show available code actions |
 | `<leader>rn` | n | Rename symbol |
 | `<leader>D` | n | Buffer diagnostics |
-| `<leader>d` | n | Show all diagnostics for the current line in a popup |
+| `<leader>d` | n | Line diagnostics |
 | `[d` | n | Prev diagnostic |
 | `]d` | n | Next diagnostic |
 | `<leader>rs` | n | Restart LSP |

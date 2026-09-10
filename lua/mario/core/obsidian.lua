@@ -209,7 +209,7 @@ function M.opts()
             end,
         },
         picker = {
-            name = "telescope.nvim",
+            name = "snacks.picker",
             note_mappings = { new = "<C-x>", insert_link = "<C-l>" },
             tag_mappings  = { tag_note = "<C-x>", insert_tag = "<C-l>" },
         },

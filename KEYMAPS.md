@@ -72,6 +72,8 @@ Leader key: `Space`
 | `<leader>ff` | n | Find files |
 | `<leader>fw` | n | Live grep |
 | `<leader>fc` | n | Grep word under cursor |
+| `<leader>*` | n | Highlight word under cursor (forward) |
+| `<leader>#` | n | Highlight word under cursor (backward) |
 | `<leader>fb` | n | Find buffers |
 | `<leader>fk` | n | Find keymaps |
 | `<C-j>` / `<C-k>` | Picker | Next / previous result |

@@ -44,6 +44,27 @@ end, { desc = "Delete buffer (keep split)" })
 
 keymap.set("n", "<leader>n", "<cmd>tabnew<CR>", { desc = "New tab" })
 
+-- Highlight the word under the cursor without moving to another match.
+local function highlight_cword(search_forward)
+    local word = vim.fn.expand("<cword>")
+    if word == "" then
+        return
+    end
+
+    vim.fn.setreg("/", "\\<" .. vim.fn.escape(word, "\\.*~[") .. "\\>")
+    vim.v.searchforward = search_forward and 1 or 0
+    vim.opt.hlsearch = true
+    vim.cmd("redraw")
+end
+
+keymap.set("n", "<leader>*", function()
+    highlight_cword(true)
+end, { desc = "Highlight word (forward)" })
+
+keymap.set("n", "<leader>#", function()
+    highlight_cword(false)
+end, { desc = "Highlight word (backward)" })
+
 -- LSP extras (Snacks)
 keymap.set("n", "<leader>ci", function() Snacks.picker.lsp_incoming_calls() end, { desc = "Find callers of this function" })
 keymap.set("n", "<leader>co", function() Snacks.picker.lsp_outgoing_calls() end, { desc = "Find functions called from here" })

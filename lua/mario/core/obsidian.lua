@@ -120,7 +120,7 @@ function M.setup_markdown_buffer(bufnr)
     local opt = vim.opt_local
     opt.wrap = true
     opt.linebreak = true
-    opt.conceallevel = 2
+    opt.conceallevel = 0
     opt.concealcursor = "nc"
     opt.spell = false
     opt.textwidth = 100

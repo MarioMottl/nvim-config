@@ -108,6 +108,10 @@ M.items = {
         repo = "nyoom-engineering/oxocarbon.nvim",
         schemes = { "oxocarbon" },
     },
+    {
+        repo = "ThunderBoltCODMYT/gruber-darker.vim",
+        schemes = { "gruber-darker" },
+    },
 }
 
 function M.names()

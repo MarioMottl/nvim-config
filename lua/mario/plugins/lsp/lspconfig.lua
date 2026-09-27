@@ -96,6 +96,28 @@ return {
 
                 if client and client.server_capabilities.inlayHintProvider
                     and vim.g.inlay_hints_enabled and not no_hints then
+                    -- Neovim can cache visible lines before the first hints arrive.
+                    -- Refresh once after that response so those lines are drawn too.
+                    local refresh_autocmd
+                    refresh_autocmd = vim.api.nvim_create_autocmd("LspRequest", {
+                        buffer = ev.buf,
+                        callback = function(request_ev)
+                            if request_ev.data.client_id ~= client.id
+                                or request_ev.data.request.method ~= "textDocument/inlayHint"
+                                or request_ev.data.request.type ~= "complete" then
+                                return
+                            end
+
+                            vim.api.nvim_del_autocmd(refresh_autocmd)
+                            vim.schedule(function()
+                                if vim.api.nvim_buf_is_loaded(ev.buf)
+                                    and vim.g.inlay_hints_enabled
+                                    and vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf }) then
+                                    vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
+                                end
+                            end)
+                        end,
+                    })
                     vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
                 end
             end,

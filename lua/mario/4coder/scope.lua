@@ -1,47 +1,12 @@
--- Nested scope backgrounds.  Only a handful of range extmarks are changed per
--- update; hlchunk.nvim continues to provide its efficient structural outline.
+-- Brace enclosure guides and closing labels, following 4coder QOL's
+-- qol_draw_scopes. Terminal guides occupy indentation cells only.
 local M = {}
 
 local ns = vim.api.nvim_create_namespace("mario_4coder_scope")
 local states = {}
 local state_store = require("mario.core.state")
 local supported = { c = true, cpp = true, rust = true, zig = true }
--- A deep control-flow nest is still cheap: this is one range extmark per
--- ancestor, not a per-line redraw.  Keep enough levels to show the complete
--- path in real-world Rust match/loop code.
-local max_scopes = 1
-
-local scope_types = {
-    block = true, compound_statement = true, declaration_list = true,
-    function_definition = true, function_item = true, function_declaration = true,
-    method_definition = true, class_definition = true, class_specifier = true,
-    struct_specifier = true, struct_item = true, union_item = true,
-    enum_specifier = true, enum_item = true, impl_item = true, trait_item = true,
-    namespace_definition = true, module = true, mod_item = true,
-    if_statement = true, if_expression = true, for_statement = true,
-    for_expression = true, while_statement = true, while_expression = true,
-    switch_statement = true, switch_expression = true, match_expression = true,
-    match_arm = true, loop_expression = true, closure_expression = true,
-    catch_clause = true, test_declaration = true, container_declaration = true,
-}
-
-local function is_scope(node)
-    local kind = node:type()
-    return scope_types[kind]
-        or kind:match("_block$") ~= nil
-        or kind:match("_body$") ~= nil
-end
-
-local function semantic_scope(node)
-    -- A block is implementation detail; its owning `if`, `for`, function, or
-    -- match expression is the scope a 4coder-style guide should represent.
-    local kind = node:type()
-    if kind == "block" or kind == "compound_statement" or kind:match("_block$") then
-        local parent = node:parent()
-        if parent and is_scope(parent) then return parent end
-    end
-    return node
-end
+local max_scopes = 30
 
 local function setup_highlights()
     local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
@@ -60,8 +25,8 @@ local function setup_highlights()
         vim.api.nvim_set_hl(0, "FourCoderScope" .. depth, { bg = mix(amount) })
     end
     vim.api.nvim_set_hl(0, "FourCoderScopeLabel", { link = "Comment" })
-    for depth = 2, max_scopes do
-        local amount = 0.48 * (0.78 ^ (depth - 2))
+    for depth = 1, max_scopes do
+        local amount = depth == 1 and 0.48 or 0.25
         vim.api.nvim_set_hl(0, "FourCoderScopeGuide" .. depth, { fg = mix(amount) })
     end
 end
@@ -75,12 +40,22 @@ local function clear(bufnr)
     state.marks, state.key = {}, nil
 end
 
-local function scope_label(bufnr, node)
-    -- `semantic_scope` already promoted a raw block to its owner, so use the
-    -- scope node itself.  Its text begins with exactly the header we need.
+local function scope_label(bufnr, node, opening)
+    -- Bodies begin at the brace; their parent supplies the declaration header.
+    if node:type() == "block" or node:type():match("_list$")
+        or node:type():match("_body$") or node:type():match("_block$")
+        or node:type() == "compound_statement" then
+        node = node:parent() or node
+    end
     local header = (vim.treesitter.get_node_text(node, bufnr) or ""):match("^(.-)%s*{")
-    if not header then return end
-    header = header:gsub("%s+", " "):gsub("%s+$", "")
+    if not header or header:match("^%s*$") then
+        -- Rust macro bodies contain token_tree nodes, not if/match nodes.
+        -- Recover their header from the actual opening brace's source line.
+        local row, col = opening:range()
+        local line = vim.api.nvim_buf_get_lines(bufnr, row, row + 1, false)[1] or ""
+        header = line:sub(1, col):gsub("^%s*}%s*", "")
+    end
+    header = header:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
     if header == "" then return end
     if #header > 56 then header = header:sub(1, 53) .. "..." end
     return header
@@ -99,18 +74,27 @@ local function collect_scopes(bufnr, row, col)
 
     local scopes, seen = {}, {}
     while node and #scopes < max_scopes do
-        if node:named() and is_scope(node) then
-            local scope = semantic_scope(node)
-            local sr, sc, er, ec = scope:range()
+        -- Inspect direct delimiters so a declaration and its body cannot
+        -- contribute duplicate outlines. This also includes struct literals.
+        local opening, closing
+        for child in node:iter_children() do
+            if child:type() == "{" then opening = child end
+            if child:type() == "}" then closing = child end
+        end
+        if opening and closing then
+            local sr, sc = opening:range()
+            local er, ec = closing:range()
             local key = table.concat({ sr, sc, er, ec }, ":")
-            if not seen[key] and (er > sr or ec > sc) then
+            local inside = (row > sr or (row == sr and col >= sc))
+                and (row < er or (row == er and col <= ec))
+            if inside and er > sr and not seen[key] then
                 seen[key] = true
                 scopes[#scopes + 1] = {
                     start_row = sr,
                     start_col = sc,
                     end_row = er,
-                    end_col = ec,
-                    label = scope_label(bufnr, scope),
+                    end_col = ec + 1,
+                    label = scope_label(bufnr, node, opening),
                 }
             end
         end
@@ -133,12 +117,15 @@ function M.update(bufnr, winid)
     -- full-line background without allocating marks for a large whole buffer.
     local visible_start = vim.fn.line("w0") - 1
     local visible_end = vim.fn.line("w$") - 1
-    local key = vim.inspect({ scopes = scopes, first = visible_start, last = visible_end })
+    local leftcol = vim.api.nvim_win_call(winid, function() return vim.fn.winsaveview().leftcol end)
+    local key = vim.inspect({ scopes = scopes, first = visible_start, last = visible_end,
+        leftcol = leftcol, tick = vim.api.nvim_buf_get_changedtick(bufnr) })
     local state = states[bufnr] or { marks = {} }
     states[bufnr] = state
     if state.key == key then return end
     clear(bufnr)
 
+    local labels = {}
     for depth, scope in ipairs(scopes) do
         if vim.g.fourcoder_scope_backgrounds then
             local last_scope_line = scope.end_col == 0 and scope.end_row - 1 or scope.end_row
@@ -151,27 +138,30 @@ function M.update(bufnr, winid)
                 })
             end
         end
-        -- hlchunk draws the innermost scope.  These guide marks deliberately
-        -- begin with its parent, so a cursor in `if` also shows its enclosing
-        -- `match`, `for`, and function without drawing a duplicate inner box.
-        if depth > 1 then
-            local last_scope_line = scope.end_col == 0 and scope.end_row - 1 or scope.end_row
-            local first = math.max(scope.start_row + 1, visible_start)
-            local last = math.min(last_scope_line, visible_end)
-            local guide_col = math.max(0, scope.start_col - 1)
-            for line = first, last do
-                local closing = line == last
-                -- Keep the whole guide in the preceding indentation cell.
-                -- That aligns the corner with its vertical and never masks
-                -- the source closing brace.
-                if not closing or guide_col < scope.start_col then
-                    state.marks[#state.marks + 1] = vim.api.nvim_buf_set_extmark(bufnr, ns, line, 0, {
-                    virt_text = { { closing and "└" or "│", "FourCoderScopeGuide" .. depth } },
+        -- 4coder places the outline just left of the brace rectangle.
+        -- Use the closing line's indentation as the terminal equivalent;
+        -- never overlay a source character, including on outdented lines.
+        local closing_text = vim.api.nvim_buf_get_lines(bufnr, scope.end_row, scope.end_row + 1, false)[1] or ""
+        local indent = closing_text:match("^[ \t]*")
+        local guide_col = math.max(0, vim.fn.strdisplaywidth(indent) - 1)
+        local first = math.max(scope.start_row + 1, visible_start)
+        local last = math.min(scope.end_row, visible_end)
+        for line = first, last do
+            local content = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1] or ""
+            local whitespace = content:match("^[ \t]*")
+            local column = guide_col - leftcol
+            -- Position a single glyph, including beyond EOL on blank lines.
+            -- Padding from a buffer anchor would erase outer guides when
+            -- several scopes share an empty line or a tab.
+            if column >= 0 and (content == whitespace
+                or vim.fn.strdisplaywidth(whitespace) > guide_col) then
+                state.marks[#state.marks + 1] = vim.api.nvim_buf_set_extmark(bufnr, ns, line, 0, {
+                    virt_text = { { line == scope.end_row and "└" or "│", "FourCoderScopeGuide" .. depth } },
                     virt_text_pos = "overlay",
-                    virt_text_win_col = guide_col,
+                    virt_text_win_col = column,
+                    hl_mode = "combine",
                     priority = 140 - depth,
-                    })
-                end
+                })
             end
         end
         -- Every ancestor gets its own closing-brace annotation, mirroring
@@ -179,12 +169,18 @@ function M.update(bufnr, winid)
         if scope.label then
             local label_row = scope.end_row
             if scope.end_col == 0 and label_row > scope.start_row then label_row = label_row - 1 end
-            state.marks[#state.marks + 1] = vim.api.nvim_buf_set_extmark(bufnr, ns, label_row, 0, {
-                virt_text = { { " " .. scope.label, "FourCoderScopeLabel" } },
-                virt_text_pos = "eol",
-                priority = 130,
-            })
+            labels[label_row] = labels[label_row] or {}
+            table.insert(labels[label_row], scope.label)
         end
+    end
+    -- Combine scopes closing on the same line so their EOL annotations
+    -- cannot compete for the same display position.
+    for row, names in pairs(labels) do
+        state.marks[#state.marks + 1] = vim.api.nvim_buf_set_extmark(bufnr, ns, row, 0, {
+            virt_text = { { " " .. table.concat(names, " · "), "FourCoderScopeLabel" } },
+            virt_text_pos = "eol",
+            priority = 130,
+        })
     end
     state.key = key
 end
@@ -203,7 +199,7 @@ function M.toggle_backgrounds()
 end
 
 function M.setup()
-    vim.g.fourcoder_scope_backgrounds = state_store.get("fourcoder_scope_backgrounds", true)
+    vim.g.fourcoder_scope_backgrounds = state_store.get("fourcoder_scope_backgrounds", false)
     setup_highlights()
     vim.api.nvim_create_user_command("FourCoderToggleScopeBackground", M.toggle_backgrounds, {})
     local group = vim.api.nvim_create_augroup("MarioFourCoderScope", { clear = true })
@@ -226,7 +222,9 @@ function M.setup()
         group = group,
         callback = function(args)
             states[args.buf] = nil
-            if timers[args.buf] then timers[args.buf]:stop(); timers[args.buf] = nil end
+            if timers[args.buf] then
+                timers[args.buf]:stop(); timers[args.buf] = nil
+            end
         end,
     })
     vim.api.nvim_create_autocmd("ColorScheme", { group = group, callback = setup_highlights })

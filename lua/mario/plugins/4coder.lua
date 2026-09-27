@@ -5,11 +5,10 @@ return {
     "shellRaining/hlchunk.nvim",
     event = { "BufReadPre", "BufNewFile" },
     config = function()
-        -- hlchunk owns the fast Tree-sitter chunk indicator/extmark machinery.
-        -- mario.4coder.scope adds the quieter nested background ranges below.
+        -- The custom renderer owns the complete brace enclosure stack.
         require("hlchunk").setup({
             chunk = {
-                enable = true,
+                enable = false,
                 use_treesitter = true,
                 style = { { fg = "#596275" }, { fg = "#7f5f5f" } },
                 chars = {
